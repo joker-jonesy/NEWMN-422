@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  profile  Profile?
+  username String
+  posts    Post[]
+}
+
+//  one to one
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String?
+  userId Int     @unique
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// one to many
+model Post {
+  id       Int    @id @default(autoincrement())
+  authorId Int
+  author   User   @relation(fields: [authorId], references: [id])
+  content  String
+  tags     Tag[]
+}
+
+// many to many
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  name        String
+  enrollments Enrollment[]
+}
+
+model Course {
+  id          Int          @id @default(autoincrement())
+  name        String
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  courseId   Int
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grade      String?
+  enrolledAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
+}
